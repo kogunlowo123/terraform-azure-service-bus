@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture - terraform-azure-service-bus</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0b0c0b;color:#f5f2eb;font-family:'Courier New',monospace;line-height:1.7}
+a{color:#c8420a;text-decoration:none}a:hover{text-decoration:underline}
+.container{max-width:1200px;margin:0 auto;padding:2rem}
+.badge{display:inline-block;background:#0078D4;color:#fff;padding:0.3rem 1rem;border-radius:4px;font-size:0.85rem;margin-bottom:1.5rem}
+h1{font-size:2.2rem;color:#c8420a;border-bottom:2px solid #c8420a;padding-bottom:0.5rem;margin-bottom:1.5rem}
+h2{font-size:1.5rem;color:#c8420a;margin:2rem 0 1rem;border-left:4px solid #c8420a;padding-left:0.75rem}
+h3{font-size:1.1rem;color:#f5f2eb;margin:1.2rem 0 0.5rem}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1rem 0}
+.card{background:#161816;border:1px solid #2a2d2a;border-radius:8px;padding:1.2rem;transition:border-color 0.2s}.card:hover{border-color:#c8420a}
+.card .num{font-size:2rem;color:#c8420a;font-weight:bold}
+.card .label{color:#a0a0a0;font-size:0.85rem}
+.card .value{color:#f5f2eb;font-size:1rem;margin-top:0.25rem}
+.arch-diagram{background:#161816;border:1px solid #2a2d2a;border-radius:8px;padding:2rem;margin:1rem 0;overflow-x:auto}
+.flow-row{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0.5rem;margin:0.75rem 0}
+.flow-box{background:#1e201e;border:2px solid #c8420a;border-radius:6px;padding:0.6rem 1.2rem;text-align:center;min-width:140px;font-size:0.85rem}
+.flow-box.accent{background:#c8420a;color:#fff;border-color:#c8420a}
+.flow-box.blue{border-color:#0078D4;background:#0a1628}
+.flow-box.green{border-color:#27AE60;background:#0a1e12}
+.flow-box.yellow{border-color:#F39C12;background:#1e1a0a}
+.flow-box.red{border-color:#E74856;background:#1e0a0e}
+.flow-arrow{color:#c8420a;font-size:1.5rem}
+.flow-arrow-down{text-align:center;color:#c8420a;font-size:1.5rem;margin:0.25rem 0}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:0.85rem}
+th{background:#1a1c1a;color:#c8420a;text-align:left;padding:0.6rem;border:1px solid #2a2d2a}
+td{padding:0.6rem;border:1px solid #2a2d2a;color:#f5f2eb}
+tr:nth-child(even){background:#131513}
+code{background:#1a1c1a;padding:0.15rem 0.4rem;border-radius:3px;font-size:0.85rem;color:#c8420a}
+pre{background:#1a1c1a;padding:1rem;border-radius:6px;overflow-x:auto;margin:0.5rem 0;font-size:0.82rem;color:#f5f2eb;border:1px solid #2a2d2a}
+.checklist{list-style:none;padding:0}.checklist li{padding:0.4rem 0;border-bottom:1px solid #1a1c1a}
+.checklist li::before{content:"[ ] ";color:#c8420a;font-weight:bold}
+.section{margin-bottom:2.5rem}
+.tag{display:inline-block;background:#1a1c1a;border:1px solid #c8420a;color:#c8420a;padding:0.15rem 0.5rem;border-radius:3px;font-size:0.75rem;margin:0.15rem}
+footer{border-top:1px solid #2a2d2a;padding-top:1.5rem;margin-top:3rem;color:#666;font-size:0.8rem;text-align:center}
+</style>
+</head>
+<body>
+<div class="container">
+
+<span class="badge">Microsoft Azure</span>
+<h1>terraform-azure-service-bus</h1>
+
+<div class="section">
+<h2>Executive Summary</h2>
+<p>This Terraform module deploys a production-ready Azure Service Bus namespace with comprehensive messaging infrastructure. It supports queues with dead-letter handling, topics with subscription filtering (SQL and correlation), multi-level authorization rules, network rule sets with IP and VNet controls, private endpoint connectivity, managed identity, customer-managed key encryption, zone redundancy, and diagnostic settings. The module enables enterprise-grade asynchronous messaging for microservices, event-driven architectures, and distributed systems.</p>
+</div>
+
+<div class="section">
+<h2>Overview</h2>
+<div class="card-grid">
+<div class="card"><div class="num">10</div><div class="label">Resource Types</div><div class="value">Namespace, Queues, Topics, Subscriptions, Rules, Auth, Network, PE, Diagnostics</div></div>
+<div class="card"><div class="num">3</div><div class="label">SKU Tiers</div><div class="value">Basic, Standard, Premium</div></div>
+<div class="card"><div class="num">3</div><div class="label">Auth Rule Levels</div><div class="value">Namespace, Queue, Topic</div></div>
+<div class="card"><div class="num">20</div><div class="label">Input Variables</div><div class="value">Fully configurable module</div></div>
+<div class="card"><div class="num">15</div><div class="label">Outputs</div><div class="value">IDs, endpoints, connection strings</div></div>
+<div class="card"><div class="num">TLS 1.2</div><div class="label">Minimum TLS</div><div class="value">Enforced by default</div></div>
+</div>
+</div>
+
+<div class="section">
+<h2>Architecture Diagram</h2>
+<div class="arch-diagram">
+<div class="flow-row">
+<div class="flow-box accent">Service Bus Namespace</div>
+</div>
+<div class="flow-arrow-down">&#9660;</div>
+<div class="flow-row">
+<div class="flow-box blue">Queues</div>
+<div class="flow-box blue">Topics</div>
+<div class="flow-box yellow">Namespace Auth Rules</div>
+</div>
+<div class="flow-arrow-down">&#9660;</div>
+<div class="flow-row">
+<div class="flow-box red">Dead Letter Queues</div>
+<div class="flow-box">Session Support</div>
+<div class="flow-box blue">Subscriptions</div>
+<div class="flow-box yellow">Queue Auth Rules</div>
+<div class="flow-box yellow">Topic Auth Rules</div>
+</div>
+<div class="flow-arrow-down">&#9660;</div>
+<div class="flow-row">
+<div class="flow-box">Subscription Rules (SQL / Correlation)</div>
+</div>
+<div class="flow-arrow-down">&#9660;</div>
+<div class="flow-row">
+<div class="flow-box green">Network Rule Set</div>
+<div class="flow-box green">Private Endpoints</div>
+<div class="flow-box green">Private DNS Zones</div>
+</div>
+<div class="flow-arrow-down">&#9660;</div>
+<div class="flow-row">
+<div class="flow-box">Diagnostic Settings</div>
+<div class="flow-box">Customer Managed Key</div>
+<div class="flow-box">Managed Identity</div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2>Component Breakdown</h2>
+<h3>Service Bus Namespace</h3>
+<p>Core messaging namespace with configurable SKU (Basic/Standard/Premium), capacity (1-16 messaging units for Premium), zone redundancy, managed identity, CMK encryption, and TLS enforcement.</p>
+<h3>Queues</h3>
+<p>Point-to-point messaging with max delivery count, lock duration, message TTL, auto-delete, duplicate detection, batched operations, express mode, partitioning, session support, and dead-letter on expiration. Supports message forwarding.</p>
+<h3>Topics and Subscriptions</h3>
+<p>Publish-subscribe messaging. Topics support ordering, partitioning, and duplicate detection. Subscriptions filter messages via SQL or correlation filters with configurable dead-lettering and forwarding.</p>
+<h3>Authorization Rules</h3>
+<p>Granular access control at namespace, queue, and topic levels with Listen, Send, and Manage permissions. Each rule generates independent connection strings and access keys.</p>
+<h3>Network Security</h3>
+<p>Network rule sets with default action, trusted services bypass, IP rules, and VNet subnet rules. Private endpoints provide secure connectivity with DNS zone group integration.</p>
+<h3>Diagnostics</h3>
+<p>Configurable diagnostic settings supporting Log Analytics, Storage Account, Event Hub, and partner solutions. Tracks OperationalLogs, VNetAndIPFilteringLogs, RuntimeAuditLogs, and ApplicationMetricsLogs.</p>
+</div>
+
+<div class="section">
+<h2>Data Flow</h2>
+<ol style="padding-left:1.5rem">
+<li>Producers authenticate via namespace/queue/topic authorization rules or managed identity</li>
+<li>Messages are sent to queues (point-to-point) or topics (pub-sub)</li>
+<li>For topics, subscriptions filter messages using SQL or correlation filters</li>
+<li>Consumers receive and process messages with configurable lock duration</li>
+<li>Failed messages are retried up to max_delivery_count, then dead-lettered</li>
+<li>Network rules and private endpoints control network-level access</li>
+<li>Diagnostic settings stream operational and audit logs to monitoring targets</li>
+</ol>
+</div>
+
+<div class="section">
+<h2>Security Controls</h2>
+<table>
+<tr><th>Control</th><th>Implementation</th></tr>
+<tr><td>Encryption at Rest</td><td>Customer-managed keys via Key Vault with optional infrastructure encryption</td></tr>
+<tr><td>Encryption in Transit</td><td>Minimum TLS 1.2 enforced by default</td></tr>
+<tr><td>Network Isolation</td><td>Network rule sets with IP/VNet rules, private endpoints</td></tr>
+<tr><td>Identity</td><td>SystemAssigned and UserAssigned managed identities</td></tr>
+<tr><td>Access Control</td><td>Three-tier authorization rules (namespace, queue, topic)</td></tr>
+<tr><td>Local Auth</td><td>SAS authentication can be disabled for AAD-only access</td></tr>
+<tr><td>Zone Redundancy</td><td>Available for Premium SKU</td></tr>
+<tr><td>Audit Logging</td><td>Diagnostic settings with RuntimeAuditLogs</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>Industry Adaptation</h2>
+<div class="card-grid">
+<div class="card"><h3>Microservices</h3><p>Use queues for command patterns, topics for event broadcasting. Enable sessions for ordered processing and duplicate detection for idempotency.</p></div>
+<div class="card"><h3>E-Commerce</h3><p>Order processing queues with dead-letter handling, event topics for inventory/shipping notifications, Premium SKU for guaranteed throughput.</p></div>
+<div class="card"><h3>Financial Services</h3><p>Premium SKU with CMK encryption, private endpoints, disabled local auth, zone redundancy for HA, full audit logging enabled.</p></div>
+<div class="card"><h3>IoT / Telemetry</h3><p>High-throughput topics with partitioning, batched operations, subscription filters for routing telemetry to different processing pipelines.</p></div>
+</div>
+</div>
+
+<div class="section">
+<h2>Production Readiness Checklist</h2>
+<ul class="checklist">
+<li>Select appropriate SKU tier (Premium for production workloads)</li>
+<li>Configure zone redundancy for Premium namespaces</li>
+<li>Set minimum TLS version to 1.2</li>
+<li>Disable local auth and use managed identity where possible</li>
+<li>Configure network rules to restrict public access</li>
+<li>Deploy private endpoints for secure connectivity</li>
+<li>Enable dead-letter queues for failed message handling</li>
+<li>Set appropriate max_delivery_count for retry policies</li>
+<li>Configure diagnostic settings for operational monitoring</li>
+<li>Set up authorization rules with least-privilege access</li>
+<li>Enable customer-managed key encryption for compliance</li>
+<li>Apply resource tags for governance and cost tracking</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>Configuration Reference</h2>
+<h3>Required Variables</h3>
+<table>
+<tr><th>Variable</th><th>Type</th><th>Description</th></tr>
+<tr><td><code>name</code></td><td>string</td><td>Namespace name (6-50 chars)</td></tr>
+<tr><td><code>resource_group_name</code></td><td>string</td><td>Target resource group</td></tr>
+<tr><td><code>location</code></td><td>string</td><td>Azure region</td></tr>
+</table>
+<h3>Key Optional Variables</h3>
+<table>
+<tr><th>Variable</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>sku</code></td><td>string</td><td>Standard</td><td>Basic, Standard, or Premium</td></tr>
+<tr><td><code>capacity</code></td><td>number</td><td>0</td><td>Messaging units (Premium only)</td></tr>
+<tr><td><code>minimum_tls_version</code></td><td>string</td><td>1.2</td><td>Minimum TLS version</td></tr>
+<tr><td><code>local_auth_enabled</code></td><td>bool</td><td>true</td><td>SAS authentication toggle</td></tr>
+<tr><td><code>queues</code></td><td>map(object)</td><td>{}</td><td>Queue configurations</td></tr>
+<tr><td><code>topics</code></td><td>map(object)</td><td>{}</td><td>Topic configurations</td></tr>
+<tr><td><code>subscriptions</code></td><td>map(object)</td><td>{}</td><td>Subscription configurations</td></tr>
+<tr><td><code>private_endpoints</code></td><td>map(object)</td><td>{}</td><td>Private endpoint configs</td></tr>
+<tr><td><code>diagnostic_settings</code></td><td>map(object)</td><td>{}</td><td>Diagnostic settings</td></tr>
+</table>
+<h3>Key Outputs</h3>
+<table>
+<tr><th>Output</th><th>Description</th></tr>
+<tr><td><code>namespace_id</code></td><td>Service Bus namespace ID</td></tr>
+<tr><td><code>namespace_endpoint</code></td><td>Namespace endpoint URL</td></tr>
+<tr><td><code>default_primary_connection_string</code></td><td>Primary connection string (sensitive)</td></tr>
+<tr><td><code>queue_ids</code></td><td>Map of queue names to IDs</td></tr>
+<tr><td><code>topic_ids</code></td><td>Map of topic names to IDs</td></tr>
+<tr><td><code>private_endpoint_ids</code></td><td>Map of PE names to IDs</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>Deployment</h2>
+<pre>
+# Initialize Terraform
+terraform init
+
+# Preview changes
+terraform plan -out=tfplan
+
+# Apply configuration
+terraform apply tfplan
+</pre>
+<h3>Prerequisites</h3>
+<ul style="padding-left:1.5rem;margin-top:0.5rem">
+<li>Terraform >= 1.3.0</li>
+<li>AzureRM provider >= 3.80.0</li>
+<li>Existing Azure Resource Group</li>
+<li>For private endpoints: existing subnet and optional DNS zone</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>Links</h2>
+<ul style="padding-left:1.5rem">
+<li><a href="https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview">Azure Service Bus Overview</a></li>
+<li><a href="https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/servicebus_namespace">Terraform azurerm_servicebus_namespace</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-premium-messaging">Service Bus Premium Messaging</a></li>
+</ul>
+</div>
+
+<footer>
+<p>terraform-azure-service-bus &middot; Architecture Documentation &middot; Generated 2026-03-15</p>
+<p>Terraform Module for Microsoft Azure</p>
+</footer>
+
+</div>
+</body>
+</html>
