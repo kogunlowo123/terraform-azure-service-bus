@@ -9,17 +9,17 @@ variable "name" {
 }
 
 variable "resource_group_name" {
-  description = "The name of the resource group in which to create the Service Bus namespace."
+  description = "The name of the resource group."
   type        = string
 }
 
 variable "location" {
-  description = "The Azure region where the Service Bus namespace will be created."
+  description = "The Azure region for the Service Bus namespace."
   type        = string
 }
 
 variable "sku" {
-  description = "The SKU of the Service Bus namespace. Possible values are Basic, Standard, and Premium."
+  description = "The SKU of the namespace (Basic, Standard, or Premium)."
   type        = string
   default     = "Standard"
 
@@ -30,7 +30,7 @@ variable "sku" {
 }
 
 variable "capacity" {
-  description = "The number of messaging units for a Premium namespace. Valid values are 1, 2, 4, 8, and 16."
+  description = "The number of messaging units for a Premium namespace (1, 2, 4, 8, or 16)."
   type        = number
   default     = 0
 
@@ -41,7 +41,7 @@ variable "capacity" {
 }
 
 variable "premium_messaging_partitions" {
-  description = "The number of partitions for a Premium namespace. Valid values are 1, 2, and 4."
+  description = "The number of partitions for a Premium namespace (1, 2, or 4)."
   type        = number
   default     = 0
 
@@ -52,19 +52,19 @@ variable "premium_messaging_partitions" {
 }
 
 variable "local_auth_enabled" {
-  description = "Whether or not SAS authentication is enabled for the Service Bus namespace."
+  description = "Whether SAS authentication is enabled for the namespace."
   type        = bool
   default     = true
 }
 
 variable "public_network_access_enabled" {
-  description = "Whether or not public network access is enabled for the Service Bus namespace."
+  description = "Whether public network access is enabled for the namespace."
   type        = bool
   default     = true
 }
 
 variable "minimum_tls_version" {
-  description = "The minimum supported TLS version for this Service Bus namespace."
+  description = "The minimum supported TLS version for the namespace."
   type        = string
   default     = "1.2"
 
@@ -75,13 +75,13 @@ variable "minimum_tls_version" {
 }
 
 variable "zone_redundant" {
-  description = "Whether or not this Service Bus namespace is zone redundant. Only available for Premium SKU."
+  description = "Whether the namespace is zone redundant (Premium SKU only)."
   type        = bool
   default     = false
 }
 
 variable "identity_type" {
-  description = "The type of managed identity to assign. Possible values are SystemAssigned, UserAssigned, or SystemAssigned, UserAssigned."
+  description = "The type of managed identity (SystemAssigned, UserAssigned, or both)."
   type        = string
   default     = null
 
@@ -92,7 +92,7 @@ variable "identity_type" {
 }
 
 variable "identity_ids" {
-  description = "A list of user-assigned managed identity IDs to assign to the Service Bus namespace."
+  description = "A list of user-assigned managed identity IDs."
   type        = list(string)
   default     = []
 }
@@ -110,22 +110,22 @@ variable "customer_managed_key" {
 variable "queues" {
   description = "Map of Service Bus queues to create."
   type = map(object({
-    max_delivery_count                    = optional(number, 10)
-    max_size_in_megabytes                 = optional(number, 1024)
-    lock_duration                         = optional(string, "PT1M")
-    default_message_ttl                   = optional(string, null)
-    auto_delete_on_idle                   = optional(string, null)
+    max_delivery_count                      = optional(number, 10)
+    max_size_in_megabytes                   = optional(number, 1024)
+    lock_duration                           = optional(string, "PT1M")
+    default_message_ttl                     = optional(string, null)
+    auto_delete_on_idle                     = optional(string, null)
     duplicate_detection_history_time_window = optional(string, null)
-    enable_batched_operations             = optional(bool, true)
-    enable_express                        = optional(bool, false)
-    enable_partitioning                   = optional(bool, false)
-    dead_lettering_on_message_expiration  = optional(bool, false)
-    requires_duplicate_detection          = optional(bool, false)
-    requires_session                      = optional(bool, false)
-    forward_to                            = optional(string, null)
-    forward_dead_lettered_messages_to     = optional(string, null)
-    max_message_size_in_kilobytes         = optional(number, null)
-    status                                = optional(string, "Active")
+    enable_batched_operations               = optional(bool, true)
+    enable_express                          = optional(bool, false)
+    enable_partitioning                     = optional(bool, false)
+    dead_lettering_on_message_expiration    = optional(bool, false)
+    requires_duplicate_detection            = optional(bool, false)
+    requires_session                        = optional(bool, false)
+    forward_to                              = optional(string, null)
+    forward_dead_lettered_messages_to       = optional(string, null)
+    max_message_size_in_kilobytes           = optional(number, null)
+    status                                  = optional(string, "Active")
   }))
   default = {}
 }
@@ -133,17 +133,17 @@ variable "queues" {
 variable "topics" {
   description = "Map of Service Bus topics to create."
   type = map(object({
-    max_size_in_megabytes                 = optional(number, 1024)
-    default_message_ttl                   = optional(string, null)
-    auto_delete_on_idle                   = optional(string, null)
+    max_size_in_megabytes                   = optional(number, 1024)
+    default_message_ttl                     = optional(string, null)
+    auto_delete_on_idle                     = optional(string, null)
     duplicate_detection_history_time_window = optional(string, null)
-    enable_batched_operations             = optional(bool, true)
-    enable_express                        = optional(bool, false)
-    enable_partitioning                   = optional(bool, false)
-    requires_duplicate_detection          = optional(bool, false)
-    max_message_size_in_kilobytes         = optional(number, null)
-    support_ordering                      = optional(bool, false)
-    status                                = optional(string, "Active")
+    enable_batched_operations               = optional(bool, true)
+    enable_express                          = optional(bool, false)
+    enable_partitioning                     = optional(bool, false)
+    requires_duplicate_detection            = optional(bool, false)
+    max_message_size_in_kilobytes           = optional(number, null)
+    support_ordering                        = optional(bool, false)
+    status                                  = optional(string, "Active")
   }))
   default = {}
 }
@@ -238,13 +238,13 @@ variable "network_rule_set" {
 }
 
 variable "private_endpoints" {
-  description = "Map of private endpoints to create for the Service Bus namespace."
+  description = "Map of private endpoints to create for the namespace."
   type = map(object({
-    subnet_id                      = string
-    private_dns_zone_ids           = optional(list(string), [])
-    subresource_names              = optional(list(string), ["namespace"])
-    is_manual_connection           = optional(bool, false)
-    request_message                = optional(string, null)
+    subnet_id                       = string
+    private_dns_zone_ids            = optional(list(string), [])
+    subresource_names               = optional(list(string), ["namespace"])
+    is_manual_connection            = optional(bool, false)
+    request_message                 = optional(string, null)
     private_service_connection_name = optional(string, null)
   }))
   default = {}

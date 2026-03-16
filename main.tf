@@ -1,18 +1,14 @@
-###############################################################################
-# Service Bus Namespace
-###############################################################################
-
 resource "azurerm_servicebus_namespace" "this" {
   name                          = var.name
   location                      = var.location
   resource_group_name           = var.resource_group_name
   sku                           = var.sku
-  capacity                      = local.capacity
-  premium_messaging_partitions  = local.premium_messaging_partitions
+  capacity                      = var.sku == "Premium" ? var.capacity : 0
+  premium_messaging_partitions  = var.sku == "Premium" ? var.premium_messaging_partitions : 0
   local_auth_enabled            = var.local_auth_enabled
   public_network_access_enabled = var.public_network_access_enabled
   minimum_tls_version           = var.minimum_tls_version
-  zone_redundant                = local.zone_redundant
+  zone_redundant                = var.sku == "Premium" ? var.zone_redundant : false
 
   dynamic "identity" {
     for_each = var.identity_type != null ? [1] : []
@@ -31,12 +27,8 @@ resource "azurerm_servicebus_namespace" "this" {
     }
   }
 
-  tags = local.merged_tags
+  tags = var.tags
 }
-
-###############################################################################
-# Network Rule Set
-###############################################################################
 
 resource "azurerm_servicebus_namespace_network_rule_set" "this" {
   count = var.network_rule_set != null ? 1 : 0
@@ -55,10 +47,6 @@ resource "azurerm_servicebus_namespace_network_rule_set" "this" {
     }
   }
 }
-
-###############################################################################
-# Queues
-###############################################################################
 
 resource "azurerm_servicebus_queue" "this" {
   for_each = var.queues
@@ -83,10 +71,6 @@ resource "azurerm_servicebus_queue" "this" {
   status                                  = each.value.status
 }
 
-###############################################################################
-# Topics
-###############################################################################
-
 resource "azurerm_servicebus_topic" "this" {
   for_each = var.topics
 
@@ -105,10 +89,6 @@ resource "azurerm_servicebus_topic" "this" {
   status                                  = each.value.status
 }
 
-###############################################################################
-# Subscriptions
-###############################################################################
-
 resource "azurerm_servicebus_subscription" "this" {
   for_each = var.subscriptions
 
@@ -126,10 +106,6 @@ resource "azurerm_servicebus_subscription" "this" {
   forward_dead_lettered_messages_to         = each.value.forward_dead_lettered_messages_to
   status                                    = each.value.status
 }
-
-###############################################################################
-# Subscription Rules
-###############################################################################
 
 resource "azurerm_servicebus_subscription_rule" "this" {
   for_each = var.subscription_rules
@@ -156,10 +132,6 @@ resource "azurerm_servicebus_subscription_rule" "this" {
   }
 }
 
-###############################################################################
-# Namespace Authorization Rules
-###############################################################################
-
 resource "azurerm_servicebus_namespace_authorization_rule" "this" {
   for_each = var.namespace_authorization_rules
 
@@ -169,10 +141,6 @@ resource "azurerm_servicebus_namespace_authorization_rule" "this" {
   send         = each.value.send
   manage       = each.value.manage
 }
-
-###############################################################################
-# Queue Authorization Rules
-###############################################################################
 
 resource "azurerm_servicebus_queue_authorization_rule" "this" {
   for_each = var.queue_authorization_rules
@@ -184,10 +152,6 @@ resource "azurerm_servicebus_queue_authorization_rule" "this" {
   manage   = each.value.manage
 }
 
-###############################################################################
-# Topic Authorization Rules
-###############################################################################
-
 resource "azurerm_servicebus_topic_authorization_rule" "this" {
   for_each = var.topic_authorization_rules
 
@@ -197,10 +161,6 @@ resource "azurerm_servicebus_topic_authorization_rule" "this" {
   send     = each.value.send
   manage   = each.value.manage
 }
-
-###############################################################################
-# Private Endpoints
-###############################################################################
 
 resource "azurerm_private_endpoint" "this" {
   for_each = var.private_endpoints
@@ -226,12 +186,8 @@ resource "azurerm_private_endpoint" "this" {
     }
   }
 
-  tags = local.merged_tags
+  tags = var.tags
 }
-
-###############################################################################
-# Diagnostic Settings
-###############################################################################
 
 resource "azurerm_monitor_diagnostic_setting" "this" {
   for_each = var.diagnostic_settings

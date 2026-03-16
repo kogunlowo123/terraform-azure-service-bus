@@ -14,25 +14,25 @@ output "namespace_endpoint" {
 }
 
 output "default_primary_connection_string" {
-  description = "The primary connection string for the namespace default authorization rule."
+  description = "The primary connection string for the default authorization rule."
   value       = azurerm_servicebus_namespace.this.default_primary_connection_string
   sensitive   = true
 }
 
 output "default_secondary_connection_string" {
-  description = "The secondary connection string for the namespace default authorization rule."
+  description = "The secondary connection string for the default authorization rule."
   value       = azurerm_servicebus_namespace.this.default_secondary_connection_string
   sensitive   = true
 }
 
 output "default_primary_key" {
-  description = "The primary access key for the namespace default authorization rule."
+  description = "The primary access key for the default authorization rule."
   value       = azurerm_servicebus_namespace.this.default_primary_key
   sensitive   = true
 }
 
 output "default_secondary_key" {
-  description = "The secondary access key for the namespace default authorization rule."
+  description = "The secondary access key for the default authorization rule."
   value       = azurerm_servicebus_namespace.this.default_secondary_key
   sensitive   = true
 }
