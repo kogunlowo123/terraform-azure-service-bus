@@ -64,7 +64,6 @@ module "service_bus" {
   sku                           = "Premium"
   capacity                      = 1
   premium_messaging_partitions  = 1
-  zone_redundant                = true
   minimum_tls_version           = "1.2"
   public_network_access_enabled = false
   identity_type                 = "SystemAssigned, UserAssigned"

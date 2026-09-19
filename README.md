@@ -43,7 +43,6 @@ flowchart TD
 - Managed identity support (SystemAssigned, UserAssigned)
 - Customer-managed key encryption
 - Diagnostic settings for Log Analytics, Storage, and Event Hub
-- Zone redundancy for Premium namespaces
 
 ## Usage
 
@@ -95,7 +94,7 @@ module "service_bus" {
 | Name | Version |
 |------|---------|
 | terraform | >= 1.3.0 |
-| azurerm | >= 3.80.0 |
+| azurerm | >= 4.0.0, < 5.0.0 |
 
 ## Inputs
 

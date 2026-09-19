@@ -8,7 +8,6 @@ resource "azurerm_servicebus_namespace" "this" {
   local_auth_enabled            = var.local_auth_enabled
   public_network_access_enabled = var.public_network_access_enabled
   minimum_tls_version           = var.minimum_tls_version
-  zone_redundant                = var.sku == "Premium" ? var.zone_redundant : false
 
   dynamic "identity" {
     for_each = var.identity_type != null ? [1] : []
@@ -27,25 +26,25 @@ resource "azurerm_servicebus_namespace" "this" {
     }
   }
 
-  tags = var.tags
-}
-
-resource "azurerm_servicebus_namespace_network_rule_set" "this" {
-  count = var.network_rule_set != null ? 1 : 0
-
-  namespace_id                  = azurerm_servicebus_namespace.this.id
-  default_action                = var.network_rule_set.default_action
-  trusted_services_allowed      = var.network_rule_set.trusted_services_allowed
-  public_network_access_enabled = var.network_rule_set.public_network_access_enabled
-  ip_rules                      = var.network_rule_set.ip_rules
-
-  dynamic "network_rules" {
-    for_each = var.network_rule_set.network_rules
+  dynamic "network_rule_set" {
+    for_each = var.network_rule_set != null ? [var.network_rule_set] : []
     content {
-      subnet_id                            = network_rules.value.subnet_id
-      ignore_missing_vnet_service_endpoint = network_rules.value.ignore_missing_vnet_service_endpoint
+      default_action                = network_rule_set.value.default_action
+      trusted_services_allowed      = network_rule_set.value.trusted_services_allowed
+      public_network_access_enabled = network_rule_set.value.public_network_access_enabled
+      ip_rules                      = network_rule_set.value.ip_rules
+
+      dynamic "network_rules" {
+        for_each = network_rule_set.value.network_rules
+        content {
+          subnet_id                            = network_rules.value.subnet_id
+          ignore_missing_vnet_service_endpoint = network_rules.value.ignore_missing_vnet_service_endpoint
+        }
+      }
     }
   }
+
+  tags = var.tags
 }
 
 resource "azurerm_servicebus_queue" "this" {
@@ -59,9 +58,9 @@ resource "azurerm_servicebus_queue" "this" {
   default_message_ttl                     = each.value.default_message_ttl
   auto_delete_on_idle                     = each.value.auto_delete_on_idle
   duplicate_detection_history_time_window = each.value.duplicate_detection_history_time_window
-  enable_batched_operations               = each.value.enable_batched_operations
-  enable_express                          = each.value.enable_express
-  enable_partitioning                     = each.value.enable_partitioning
+  batched_operations_enabled              = each.value.enable_batched_operations
+  express_enabled                         = each.value.enable_express
+  partitioning_enabled                    = each.value.enable_partitioning
   dead_lettering_on_message_expiration    = each.value.dead_lettering_on_message_expiration
   requires_duplicate_detection            = each.value.requires_duplicate_detection
   requires_session                        = each.value.requires_session
@@ -80,9 +79,9 @@ resource "azurerm_servicebus_topic" "this" {
   default_message_ttl                     = each.value.default_message_ttl
   auto_delete_on_idle                     = each.value.auto_delete_on_idle
   duplicate_detection_history_time_window = each.value.duplicate_detection_history_time_window
-  enable_batched_operations               = each.value.enable_batched_operations
-  enable_express                          = each.value.enable_express
-  enable_partitioning                     = each.value.enable_partitioning
+  batched_operations_enabled              = each.value.enable_batched_operations
+  express_enabled                         = each.value.enable_express
+  partitioning_enabled                    = each.value.enable_partitioning
   requires_duplicate_detection            = each.value.requires_duplicate_detection
   max_message_size_in_kilobytes           = each.value.max_message_size_in_kilobytes
   support_ordering                        = each.value.support_ordering
@@ -98,7 +97,7 @@ resource "azurerm_servicebus_subscription" "this" {
   lock_duration                             = each.value.lock_duration
   default_message_ttl                       = each.value.default_message_ttl
   auto_delete_on_idle                       = each.value.auto_delete_on_idle
-  enable_batched_operations                 = each.value.enable_batched_operations
+  batched_operations_enabled                = each.value.enable_batched_operations
   dead_lettering_on_message_expiration      = each.value.dead_lettering_on_message_expiration
   dead_lettering_on_filter_evaluation_error = each.value.dead_lettering_on_filter_evaluation_error
   requires_session                          = each.value.requires_session
