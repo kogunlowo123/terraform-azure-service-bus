@@ -72,14 +72,14 @@ module "service_bus" {
 
   queues = {
     "orders" = {
-      max_delivery_count                   = 10
-      max_size_in_megabytes                = 5120
-      lock_duration                        = "PT5M"
-      default_message_ttl                  = "P14D"
-      dead_lettering_on_message_expiration = true
-      requires_duplicate_detection         = true
+      max_delivery_count                      = 10
+      max_size_in_megabytes                   = 5120
+      lock_duration                           = "PT5M"
+      default_message_ttl                     = "P14D"
+      dead_lettering_on_message_expiration    = true
+      requires_duplicate_detection            = true
       duplicate_detection_history_time_window = "PT10M"
-      max_message_size_in_kilobytes        = 102400
+      max_message_size_in_kilobytes           = 102400
     }
     "order-deadletter-handler" = {
       max_delivery_count  = 5
